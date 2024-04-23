@@ -48,6 +48,15 @@ RSpec.describe 'OCR documents', type: :request do
       expect(response.body).to include('Uploaded image')
     end
 
+    it 'shows the failure message instead of a spinner once processing gave up' do
+      document = create(:ocr_document, processing_error: 'Text could not be read from this image.')
+
+      get ocr_document_path(document)
+
+      expect(response.body).to include('Text could not be read from this image.')
+      expect(response.body).not_to include('Being processed')
+    end
+
     it 'redirects home with a message for an unknown id' do
       get ocr_document_path(0)
 

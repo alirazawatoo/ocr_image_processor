@@ -15,6 +15,14 @@ class OcrDocument < ApplicationRecord
 
   after_create_commit :enqueue_text_extraction
 
+  def failed?
+    processing_error.present?
+  end
+
+  def text_ready?
+    hocr_processed_at.present?
+  end
+
   private
 
   def enqueue_text_extraction

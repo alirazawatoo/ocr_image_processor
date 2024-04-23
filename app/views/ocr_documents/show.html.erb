@@ -1,7 +1,11 @@
 <div data-controller="ocr-documents" data-ocr-documents-url-value="<%= search_ocr_document_path(@ocr_document) %>">
 <h2 class="image-heading"> hOCR Processed Images</h2>
 
-<% if @ocr_document&.hocr_processed_at.present? %>
+<% if @ocr_document.failed? %>
+  <p class="processing-error" role="alert"><%= @ocr_document.processing_error %></p>
+<% end %>
+
+<% if @ocr_document.text_ready? %>
   <div class="search-container">
     <h4>Search the document : </h4>
     <form action="#" data-action="submit->ocr-documents#search">
@@ -25,6 +29,8 @@
         <% if @ocr_document.generated_image.attached? %>
             <h4>Marked Image (<%= link_to 'Download', rails_blob_path(@ocr_document.generated_image, disposition: 'attachment') %> )</h4>
             <%= image_tag @ocr_document.generated_image, class: "responsive-image" %>
+        <% elsif @ocr_document.failed? %>
+            <h4>Marked Image (not available)</h4>
         <% else %>
             <h4>Marked Image (Being processed, please refresh in a moment!!)</h4>
             <div class="loading-container">
