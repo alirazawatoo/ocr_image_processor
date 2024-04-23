@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'RMagick'
+require 'rmagick'
 
 RSpec.describe BoundingBoxDrawer do
   let(:image) { Magick::Image.new(100, 100) }
