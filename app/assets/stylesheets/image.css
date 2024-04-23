@@ -62,3 +62,14 @@
 .form-container h3 {
     margin-bottom: 20px;
 }
+
+.image-stack {
+    position: relative;
+}
+
+.match-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}

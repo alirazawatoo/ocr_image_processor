@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-# OcrDocumentsController handles the creation, display, and search of OCR documents.
+# Upload a PNG, watch it being processed, and search its recognised words.
 class OcrDocumentsController < ApplicationController
+  MAX_QUERY_LENGTH = 100
+
   before_action :find_ocr_document, only: %i[show search]
 
   def new
@@ -20,16 +22,12 @@ class OcrDocumentsController < ApplicationController
   def show; end
 
   def search
-    @search_query = params[:query]
+    query = params[:query].to_s.strip
 
-    respond_to do |format|
-      format.json do
-        if @ocr_document.present? && @search_query.present?
-          render json: OcrDocuments::TextSearch.call(@ocr_document.id, @search_query)
-        else
-          render json: { error: 'No data found' }, status: :unprocessable_entity
-        end
-      end
+    if query.empty? || query.length > MAX_QUERY_LENGTH
+      render json: { error: "Search for 1 to #{MAX_QUERY_LENGTH} characters." }, status: :unprocessable_content
+    else
+      render json: OcrDocuments::TextSearch.call(@ocr_document.id, query)
     end
   end
 
@@ -37,11 +35,12 @@ class OcrDocumentsController < ApplicationController
 
   def find_ocr_document
     @ocr_document = OcrDocument.find_by(id: params[:id])
+    return if @ocr_document
 
-    return if @ocr_document.present?
-
-    flash.now[:alert] = 'OCR document not found.'
-    redirect_to root_path
+    respond_to do |format|
+      format.html { redirect_to root_path, alert: 'That document could not be found.' }
+      format.json { render json: { error: 'Document not found.' }, status: :not_found }
+    end
   end
 
   def ocr_document_params

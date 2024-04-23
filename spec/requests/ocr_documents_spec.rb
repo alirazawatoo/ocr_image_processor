@@ -37,4 +37,58 @@ RSpec.describe 'OCR documents', type: :request do
       expect(response.body).to include('must be chosen')
     end
   end
+
+  describe 'GET /ocr_documents/:id' do
+    it 'shows the uploaded image' do
+      document = create(:ocr_document)
+
+      get ocr_document_path(document)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('Uploaded image')
+    end
+
+    it 'redirects home with a message for an unknown id' do
+      get ocr_document_path(0)
+
+      expect(response).to redirect_to(root_path)
+      expect(flash[:alert]).to eq('That document could not be found.')
+    end
+  end
+
+  describe 'GET /ocr_documents/:id/search' do
+    let(:document) { create(:ocr_document) }
+
+    before do
+      create(:text_extraction, ocr_document: document, word: 'TOTAL', x_start: 60, y_start: 414, x_end: 150, y_end: 444)
+    end
+
+    it 'returns match boxes as JSON' do
+      get search_ocr_document_path(document), params: { query: 'tot' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq([{ 'x_start' => 60, 'y_start' => 414, 'x_end' => 114, 'y_end' => 444 }])
+    end
+
+    it 'returns an empty list when nothing matches' do
+      get search_ocr_document_path(document), params: { query: 'pencil' }
+
+      expect(response.parsed_body).to eq([])
+    end
+
+    it 'rejects an empty or overlong query' do
+      get search_ocr_document_path(document), params: { query: ' ' }
+      expect(response).to have_http_status(:unprocessable_content)
+
+      get search_ocr_document_path(document), params: { query: 'x' * 101 }
+      expect(response).to have_http_status(:unprocessable_content)
+    end
+
+    it 'answers 404 JSON for an unknown document' do
+      get search_ocr_document_path(0), params: { query: 'total' }
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.parsed_body).to eq('error' => 'Document not found.')
+    end
+  end
 end

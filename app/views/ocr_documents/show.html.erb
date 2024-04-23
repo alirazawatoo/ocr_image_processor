@@ -1,20 +1,24 @@
+<div data-controller="ocr-documents" data-ocr-documents-url-value="<%= search_ocr_document_path(@ocr_document) %>">
 <h2 class="image-heading"> hOCR Processed Images</h2>
 
 <% if @ocr_document&.hocr_processed_at.present? %>
-  <div class="search-container" data-controller="ocr-documents">
+  <div class="search-container">
     <h4>Search the document : </h4>
-    <form action="#" data-action="submit->ocr-documents#search" data-ocr-document-id="<%= params[:id] %>">
-      <input type="text" placeholder="Search the document" data-ocr-documents-target="params">
+    <form action="#" data-action="submit->ocr-documents#search">
+      <input type="search" placeholder="Search the document" maxlength="100" data-ocr-documents-target="query">
       <button type="submit">Search</button>
     </form>
+    <p data-ocr-documents-target="status" aria-live="polite"></p>
   </div>
 <% end %>
 
 <div class="image-container">
     <div class="image-wrapper">
         <h4>Original Image (<%= link_to 'Download', rails_blob_path(@ocr_document.original_image, disposition: 'attachment') %> )</h4>
-        <%= image_tag @ocr_document.original_image, id: "original-image", class: "responsive-image" %>
-        <canvas id="imageCanvas"></canvas>
+        <div class="image-stack">
+          <%= image_tag @ocr_document.original_image, class: "responsive-image", alt: "Uploaded image", data: { ocr_documents_target: "image" } %>
+          <canvas class="match-layer" aria-hidden="true" data-ocr-documents-target="canvas"></canvas>
+        </div>
     </div>
 
     <div class="image-wrapper">
@@ -28,4 +32,5 @@
             </div>
         <% end %>
     </div>
+</div>
 </div>
