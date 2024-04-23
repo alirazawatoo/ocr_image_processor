@@ -6,6 +6,8 @@ class OcrDocumentsController < ApplicationController
 
   before_action :find_ocr_document, only: %i[show search]
 
+  def show; end
+
   def new
     @ocr_document = OcrDocument.new
   end
@@ -18,8 +20,6 @@ class OcrDocumentsController < ApplicationController
       render :new, status: :unprocessable_content
     end
   end
-
-  def show; end
 
   def search
     query = params[:query].to_s.strip

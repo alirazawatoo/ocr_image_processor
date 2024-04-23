@@ -37,7 +37,7 @@ class OcrDocument < ApplicationRecord
   private
 
   def enqueue_text_extraction
-    OcrDocuments::ExtractHocrDataJob.perform_later(id, true)
+    OcrDocuments::ExtractHocrDataJob.perform_later(id)
   end
 
   def acceptable_image
@@ -52,12 +52,16 @@ class OcrDocument < ApplicationRecord
     io = pending_upload_io
     return if io.nil?
 
-    width, height = PngDimensions.read(io)
-    if width.nil?
+    dimensions = PngDimensions.read(io)
+    if dimensions.nil?
       errors.add(:original_image, 'is not a valid PNG file')
-    elsif width.zero? || height.zero? || width > MAX_SIDE || height > MAX_SIDE || width * height > MAX_PIXELS
+    elsif !dimensions_allowed?(*dimensions)
       errors.add(:original_image, "must be at most #{MAX_SIDE} × #{MAX_SIDE} pixels")
     end
+  end
+
+  def dimensions_allowed?(width, height)
+    width.between?(1, MAX_SIDE) && height.between?(1, MAX_SIDE) && width * height <= MAX_PIXELS
   end
 
   # The file being attached in this save, before it reaches storage.

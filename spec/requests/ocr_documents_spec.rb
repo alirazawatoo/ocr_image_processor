@@ -19,11 +19,12 @@ RSpec.describe 'OCR documents', type: :request do
       end.to change(OcrDocument, :count).by(1)
 
       expect(response).to redirect_to(ocr_document_path(OcrDocument.last))
-      expect(OcrDocuments::ExtractHocrDataJob).to have_been_enqueued.with(OcrDocument.last.id, true)
+      expect(OcrDocuments::ExtractHocrDataJob).to have_been_enqueued.with(OcrDocument.last.id)
     end
 
     it 'answers 422 with the reason when the file is rejected' do
-      post ocr_documents_path, params: { ocr_document: { original_image: png_upload(png_bytes(width: 9_000, height: 9_000)) } }
+      bomb = png_upload(png_bytes(width: 9_000, height: 9_000))
+      post ocr_documents_path, params: { ocr_document: { original_image: bomb } }
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('must be at most 6000')

@@ -54,7 +54,7 @@ RSpec.describe OcrDocuments::ExtractTextService, type: :service do
     end
 
     it 'does not create text extractions' do
-      expect { invalid_service.call }.not_to(change { TextExtraction.count })
+      expect { invalid_service.call }.not_to change(TextExtraction, :count)
     end
   end
 

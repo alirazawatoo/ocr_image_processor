@@ -21,7 +21,7 @@ RSpec.describe OcrDocuments::TextBoundingsImageGenerator, type: :service do
   end
 
   it 'does not leave files in the application root' do
-    expect { described_class.call(ocr_document.id) }.not_to(change { Dir.children(Rails.root).sort })
+    expect { described_class.call(ocr_document.id) }.not_to(change { Rails.root.children.sort })
   end
 
   it 'does nothing for an unknown document' do

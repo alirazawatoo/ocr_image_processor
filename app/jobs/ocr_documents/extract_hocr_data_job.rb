@@ -17,7 +17,7 @@ module OcrDocuments
       job.record_failure('The uploaded file is missing from storage.', error)
     end
 
-    def perform(ocr_document_id, generate_marked_image = true)
+    def perform(ocr_document_id, generate_marked_image: true)
       ocr_document = OcrDocument.find_by(id: ocr_document_id)
       return if ocr_document.blank?
 

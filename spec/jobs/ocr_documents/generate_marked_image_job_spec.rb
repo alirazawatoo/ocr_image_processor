@@ -14,7 +14,8 @@ RSpec.describe OcrDocuments::GenerateMarkedImageJob, type: :job do
   end
 
   it 'retries ImageMagick errors, then records a readable failure' do
-    allow(OcrDocuments::TextBoundingsImageGenerator).to receive(:call).and_raise(Magick::ImageMagickError, 'no decode delegate')
+    allow(OcrDocuments::TextBoundingsImageGenerator)
+      .to receive(:call).and_raise(Magick::ImageMagickError, 'no decode delegate')
 
     perform_enqueued_jobs(only: described_class) { described_class.perform_later(ocr_document.id) }
 

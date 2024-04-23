@@ -28,11 +28,14 @@ module OcrDocuments
       start_index = word.index(@query)
       return if start_index.nil?
 
-      letter_width = (text_extraction.x_end - text_extraction.x_start).fdiv(word.length)
-      x_start = text_extraction.x_start + (start_index * letter_width)
+      x_start, x_end = match_span(text_extraction, start_index, word.length)
+      { x_start:, y_start: text_extraction.y_start, x_end:, y_end: text_extraction.y_end }
+    end
 
-      { x_start: x_start.floor, y_start: text_extraction.y_start,
-        x_end: (x_start + (@query.length * letter_width)).ceil, y_end: text_extraction.y_end }
+    def match_span(text_extraction, start_index, word_length)
+      letter_width = (text_extraction.x_end - text_extraction.x_start).fdiv(word_length)
+      x_start = text_extraction.x_start + (start_index * letter_width)
+      [x_start.floor, (x_start + (@query.length * letter_width)).ceil]
     end
   end
 end

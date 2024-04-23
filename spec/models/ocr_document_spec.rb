@@ -4,9 +4,9 @@ require 'rails_helper'
 
 RSpec.describe OcrDocument, type: :model do
   describe 'associations' do
-    it { should have_many(:text_extractions).dependent(:delete_all) }
-    it { should have_one_attached(:original_image) }
-    it { should have_one_attached(:generated_image) }
+    it { is_expected.to have_many(:text_extractions).dependent(:delete_all) }
+    it { is_expected.to have_one_attached(:original_image) }
+    it { is_expected.to have_one_attached(:generated_image) }
   end
 
   describe 'callbacks' do
@@ -14,8 +14,7 @@ RSpec.describe OcrDocument, type: :model do
       let(:ocr_document) { create(:ocr_document) }
 
       it 'queues ExtractHocrDataJob' do
-        expect(OcrDocuments::ExtractHocrDataJob).to receive(:perform_later).with(ocr_document.id, true)
-        ocr_document.run_callbacks(:commit)
+        expect(OcrDocuments::ExtractHocrDataJob).to have_been_enqueued.with(ocr_document.id)
       end
     end
   end
