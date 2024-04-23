@@ -44,4 +44,28 @@ ActiveRecord::Schema[7.1].define(version: 20_240_305_164_641) do
     t.string 'variation_digest', null: false
     t.index %w[blob_id variation_digest], name: 'index_active_storage_variant_records_uniqueness', unique: true
   end
+
+  create_table 'ocr_documents', force: :cascade do |t|
+    t.string 'uploaded_filename'
+    t.datetime 'hocr_processed_at'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+  end
+
+  create_table 'text_extractions', force: :cascade do |t|
+    t.text 'word'
+    t.integer 'confidence', null: false
+    t.integer 'x_start', null: false
+    t.integer 'y_start', null: false
+    t.integer 'x_end', null: false
+    t.integer 'y_end', null: false
+    t.bigint 'ocr_document_id', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['ocr_document_id'], name: 'index_text_extractions_on_ocr_document_id'
+  end
+
+  add_foreign_key 'active_storage_attachments', 'active_storage_blobs', column: 'blob_id'
+  add_foreign_key 'active_storage_variant_records', 'active_storage_blobs', column: 'blob_id'
+  add_foreign_key 'text_extractions', 'ocr_documents'
 end
