@@ -1,0 +1,31 @@
+<h2 class="image-heading"> hOCR Processed Images</h2>
+
+<% if @ocr_document&.hocr_processed_at.present? %>
+  <div class="search-container" data-controller="ocr-documents">
+    <h4>Search the document : </h4>
+    <form action="#" data-action="submit->ocr-documents#search" data-ocr-document-id="<%= params[:id] %>">
+      <input type="text" placeholder="Search the document" data-ocr-documents-target="params">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+<% end %>
+
+<div class="image-container">
+    <div class="image-wrapper">
+        <h4>Original Image (<%= link_to 'Download', rails_blob_path(@ocr_document.original_image, disposition: 'attachment') %> )</h4>
+        <%= image_tag @ocr_document.original_image, id: "original-image", class: "responsive-image" %>
+        <canvas id="imageCanvas"></canvas>
+    </div>
+
+    <div class="image-wrapper">
+        <% if @ocr_document.generated_image.attached? %>
+            <h4>Marked Image (<%= link_to 'Download', rails_blob_path(@ocr_document.generated_image, disposition: 'attachment') %> )</h4>
+            <%= image_tag @ocr_document.generated_image, class: "responsive-image" %>
+        <% else %>
+            <h4>Marked Image (Being processed, please refresh in a moment!!)</h4>
+            <div class="loading-container">
+                <%= image_tag "Infinity-1s-200px.gif", class: "loading-image" %>
+            </div>
+        <% end %>
+    </div>
+</div>

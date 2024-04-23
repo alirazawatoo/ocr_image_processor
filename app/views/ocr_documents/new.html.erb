@@ -1,0 +1,12 @@
+<div class="form-container">
+  <%= form_with(model: @ocr_document, url: ocr_documents_path, method: :post, local: true) do |form| %>
+    <h3>hOCR Processing App</h3>
+    <div class="form-field">
+      <%= form.label :original_image, "Upload Image" %>
+      <%= form.file_field :original_image %>
+    </div>
+    <div class="form-field">
+      <%= form.submit %>
+    </div>
+  <% end %>
+</div>
