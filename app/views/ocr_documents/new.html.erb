@@ -1,9 +1,16 @@
 <div class="form-container">
   <%= form_with(model: @ocr_document, url: ocr_documents_path, method: :post, local: true) do |form| %>
     <h3>hOCR Processing App</h3>
+    <% if @ocr_document.errors.any? %>
+      <ul class="form-errors" role="alert">
+        <% @ocr_document.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    <% end %>
     <div class="form-field">
       <%= form.label :original_image, "Upload Image" %>
-      <%= form.file_field :original_image %>
+      <%= form.file_field :original_image, accept: "image/png" %>
     </div>
     <div class="form-field">
       <%= form.submit %>

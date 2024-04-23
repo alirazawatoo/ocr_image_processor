@@ -11,10 +11,9 @@ class OcrDocumentsController < ApplicationController
   def create
     @ocr_document = OcrDocument.new(ocr_document_params)
     if @ocr_document.save
-      redirect_to @ocr_document, notice: 'Ocr document processing has been started.'
+      redirect_to @ocr_document, notice: 'Upload received. Text extraction has started.'
     else
-      flash.now[:alert] = 'Failed to save the OCR document.'
-      render :new
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -46,6 +45,6 @@ class OcrDocumentsController < ApplicationController
   end
 
   def ocr_document_params
-    params.require(:ocr_document).permit(:original_image)
+    params.fetch(:ocr_document, {}).permit(:original_image)
   end
 end
