@@ -9,10 +9,6 @@ class OcrDocument < ApplicationRecord
 
   after_commit :process_on_after_create_commit, on: :create
 
-  def original_image_path
-    Rails.application.routes.url_helpers.url_for(original_image)
-  end
-
   private
 
   def process_on_after_create_commit

@@ -1,26 +1,26 @@
 # frozen_string_literal: true
 
+# Outlines every box on the image in a single ImageMagick draw pass.
 class BoundingBoxDrawer < ApplicationService
-  def initialize(image, box_coordinates)
-    super()
+  STROKE_COLOR = '#d9480f'
+  STROKE_WIDTH = 2
 
+  # boxes: arrays of [x_start, y_start, x_end, y_end] in image pixels
+  def initialize(image, boxes)
+    super()
     @image = image
-    @box_coordinates = box_coordinates
-    @draw = initialize_draw_object
+    @boxes = boxes
   end
 
   def call
-    @draw.fill_opacity(0)
-    @draw.rectangle(*@box_coordinates)
-    @draw.draw(@image)
-  end
+    return @image if @boxes.empty?
 
-  private
-
-  def initialize_draw_object
     draw = Magick::Draw.new
-    draw.stroke = 'red'
-    draw.stroke_width(2)
-    draw
+    draw.stroke(STROKE_COLOR)
+    draw.stroke_width(STROKE_WIDTH)
+    draw.fill_opacity(0)
+    @boxes.each { |box| draw.rectangle(*box) }
+    draw.draw(@image)
+    @image
   end
 end

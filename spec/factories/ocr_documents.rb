@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :ocr_document do
     original_image do
-      Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, 'app/assets/images/example_remit.png')))
+      Rack::Test::UploadedFile.new(Rails.root.join('spec/fixtures/files/sample_receipt.png'), 'image/png')
     end
   end
 end

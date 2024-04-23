@@ -19,14 +19,4 @@ RSpec.describe OcrDocument, type: :model do
       end
     end
   end
-
-  describe '#original_image_path' do
-    let(:ocr_document) { create(:ocr_document) }
-
-    it 'returns the URL for the attached original image' do
-      expect(ocr_document.original_image_path).to eq(
-        Rails.application.routes.url_helpers.url_for(ocr_document.original_image)
-      )
-    end
-  end
 end

@@ -1,40 +1,28 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'rmagick'
 
 RSpec.describe BoundingBoxDrawer do
-  let(:image) { Magick::Image.new(100, 100) }
-  let(:box_coordinates) { [10, 10, 50, 50] }
-  let(:draw) { instance_double(Magick::Draw) }
-  subject(:bounding_box_drawer) { described_class.new(image, box_coordinates) }
+  let(:image) { Magick::Image.new(100, 100) { |info| info.background_color = 'white' } }
 
-  before do
-    allow(Magick::Draw).to receive(:new).and_return(draw)
-    allow(draw).to receive(:stroke=)
-    allow(draw).to receive(:stroke_width)
+  def white?(pixel)
+    [pixel.red, pixel.green, pixel.blue].all? { |channel| channel == Magick::QuantumRange }
   end
 
-  describe '#call' do
-    context 'when calling the service' do
-      it 'fills the draw object with opacity 0, draws rectangle, and draws the image' do
-        expect(draw).to receive(:fill_opacity).with(0)
-        expect(draw).to receive(:rectangle).with(*box_coordinates)
-        expect(draw).to receive(:draw).with(image)
+  it 'outlines each box without filling it' do
+    described_class.call(image, [[10, 10, 50, 50], [60, 60, 90, 90]])
 
-        bounding_box_drawer.call
-      end
-    end
+    expect(white?(image.pixel_color(10, 30))).to be(false)
+    expect(white?(image.pixel_color(60, 75))).to be(false)
+    expect(white?(image.pixel_color(30, 30))).to be(true)
+    expect(white?(image.pixel_color(5, 5))).to be(true)
   end
 
-  describe 'private methods' do
-    describe '#initialize_draw_object' do
-      it 'returns a draw object with proper configuration' do
-        expect(draw).to receive(:stroke=).with('red')
-        expect(draw).to receive(:stroke_width).with(2)
+  it 'leaves the image untouched when there are no boxes' do
+    before = image.export_pixels_to_str
 
-        bounding_box_drawer.send(:initialize_draw_object)
-      end
-    end
+    described_class.call(image, [])
+
+    expect(image.export_pixels_to_str).to eq(before)
   end
 end
