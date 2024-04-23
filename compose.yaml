@@ -1,0 +1,63 @@
+# Production-mode stack: web (Puma), worker (Sidekiq), Postgres and Redis.
+# Usage: cp .env.example .env, set SECRET_KEY_BASE, then `docker compose up --build`.
+
+x-app: &app
+  build: .
+  image: ocr-image-processor:local
+  environment:
+    DATABASE_URL: postgres://ocr:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/ocr_production
+    REDIS_URL: redis://redis:6379/0
+    SECRET_KEY_BASE: ${SECRET_KEY_BASE:?set SECRET_KEY_BASE in .env}
+    FORCE_SSL: ${FORCE_SSL:-true}
+    ASSUME_SSL: ${ASSUME_SSL:-false}
+  volumes:
+    - storage:/rails/storage
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  web:
+    <<: *app
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/up"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  worker:
+    <<: *app
+    command: ["bundle", "exec", "sidekiq"]
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ocr
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ocr_production
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ocr -d ocr_production"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
+  redis:
+  storage:

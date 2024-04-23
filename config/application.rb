@@ -40,6 +40,12 @@ module ImageOcrApplication
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Jobs go to Sidekiq, which reads REDIS_URL (default redis://localhost:6379/0).
     config.active_job.queue_adapter = :sidekiq
+
+    # Uploads are validated from their PNG header; Active Storage's analyzers
+    # would only queue an extra job that needs ruby-vips, which is not installed.
+    config.active_storage.analyzers = []
   end
 end
