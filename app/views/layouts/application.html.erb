@@ -1,22 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>ImageOcrApplication</title>
+    <title><%= content_for?(:title) ? "#{yield(:title)} · OCR Image Processor" : "OCR Image Processor" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#f4efe4">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>  
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <% flash.each do |type, msg| %>
-      <div>
-        <%= msg %>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="masthead">
+      <div class="masthead__inner">
+        <%= link_to root_path, class: "wordmark" do %>
+          <span class="wordmark__mark" aria-hidden="true">Aa</span>
+          <span>OCR Image Processor</span>
+        <% end %>
+        <span class="masthead__note">Tesseract word boxes, searchable</span>
       </div>
-    <% end %>
-    
-    <%= yield %>
+    </header>
+
+    <main id="main" class="page">
+      <% flash.each do |type, message| %>
+        <p class="notice notice--<%= type == "alert" ? "alert" : "info" %>" role="<%= type == "alert" ? "alert" : "status" %>"><%= message %></p>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <footer class="colophon">
+      <p>Uploads stay on this server. Each document link is signed and hard to guess, but anyone holding a link can open it.</p>
+    </footer>
   </body>
 </html>

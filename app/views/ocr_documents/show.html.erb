@@ -1,42 +1,73 @@
-<div data-controller="ocr-documents" data-ocr-documents-url-value="<%= search_ocr_document_path(@ocr_document) %>">
-<h2 class="image-heading"> hOCR Processed Images</h2>
+<% content_for :title, @ocr_document.original_image.filename.to_s %>
+<% word_count = @ocr_document.text_extractions.size %>
+<% processing = !@ocr_document.failed? && (!@ocr_document.text_ready? || !@ocr_document.generated_image.attached?) %>
 
-<% if @ocr_document.failed? %>
-  <p class="processing-error" role="alert"><%= @ocr_document.processing_error %></p>
-<% end %>
-
-<% if @ocr_document.text_ready? %>
-  <div class="search-container">
-    <h4>Search the document : </h4>
-    <form action="#" data-action="submit->ocr-documents#search">
-      <input type="search" placeholder="Search the document" maxlength="100" data-ocr-documents-target="query">
-      <button type="submit">Search</button>
-    </form>
-    <p data-ocr-documents-target="status" aria-live="polite"></p>
+<div data-controller="ocr-documents<%= " refresh" if processing %>"
+     data-ocr-documents-url-value="<%= search_ocr_document_path(@ocr_document) %>">
+  <div class="doc-head">
+    <div>
+      <p class="eyebrow">Document</p>
+      <h1 class="doc-head__title"><%= @ocr_document.original_image.filename %></h1>
+    </div>
+    <% if @ocr_document.failed? %>
+      <span class="status status--failed">Failed</span>
+    <% elsif @ocr_document.text_ready? %>
+      <span class="status status--ready"><%= pluralize(word_count, "word") %> found</span>
+    <% else %>
+      <span class="status status--working">Reading text…</span>
+    <% end %>
   </div>
-<% end %>
 
-<div class="image-container">
-    <div class="image-wrapper">
-        <h4>Original Image (<%= link_to 'Download', rails_blob_path(@ocr_document.original_image, disposition: 'attachment') %> )</h4>
-        <div class="image-stack">
-          <%= image_tag @ocr_document.original_image, class: "responsive-image", alt: "Uploaded image", data: { ocr_documents_target: "image" } %>
-          <canvas class="match-layer" aria-hidden="true" data-ocr-documents-target="canvas"></canvas>
-        </div>
-    </div>
+  <% if @ocr_document.failed? %>
+    <p class="notice notice--alert" role="alert"><%= @ocr_document.processing_error %> Try a sharper or larger scan.</p>
+  <% end %>
 
-    <div class="image-wrapper">
+  <% if @ocr_document.text_ready? && word_count.zero? %>
+    <p class="notice notice--info">Tesseract finished but found no words. Dark backgrounds, handwriting and very small text are common causes.</p>
+  <% elsif @ocr_document.text_ready? %>
+    <form class="finder" action="#" data-action="submit->ocr-documents#search" role="search">
+      <label for="finder-query">Search this page</label>
+      <div class="finder__row">
+        <input id="finder-query" type="search" placeholder="e.g. total" maxlength="100" autocomplete="off"
+               data-ocr-documents-target="query">
+        <button type="submit" class="button">Highlight</button>
+      </div>
+      <p class="finder__status" data-ocr-documents-target="status" aria-live="polite"></p>
+    </form>
+  <% end %>
+
+  <div class="plates">
+    <figure class="plate">
+      <figcaption class="plate__caption">
+        <span>Original</span>
+        <%= link_to "Download", rails_blob_path(@ocr_document.original_image, disposition: "attachment") %>
+      </figcaption>
+      <div class="plate__image">
+        <%= image_tag @ocr_document.original_image, alt: "The uploaded image, #{@ocr_document.original_image.filename}",
+                      data: { ocr_documents_target: "image" } %>
+        <canvas class="match-layer" aria-hidden="true" data-ocr-documents-target="canvas"></canvas>
+      </div>
+    </figure>
+
+    <figure class="plate">
+      <figcaption class="plate__caption">
+        <span>Every word outlined</span>
         <% if @ocr_document.generated_image.attached? %>
-            <h4>Marked Image (<%= link_to 'Download', rails_blob_path(@ocr_document.generated_image, disposition: 'attachment') %> )</h4>
-            <%= image_tag @ocr_document.generated_image, class: "responsive-image" %>
-        <% elsif @ocr_document.failed? %>
-            <h4>Marked Image (not available)</h4>
-        <% else %>
-            <h4>Marked Image (Being processed, please refresh in a moment!!)</h4>
-            <div class="loading-container">
-                <%= image_tag "Infinity-1s-200px.gif", class: "loading-image" %>
-            </div>
+          <%= link_to "Download", rails_blob_path(@ocr_document.generated_image, disposition: "attachment") %>
         <% end %>
-    </div>
-</div>
+      </figcaption>
+      <% if @ocr_document.generated_image.attached? %>
+        <div class="plate__image">
+          <%= image_tag @ocr_document.generated_image, alt: "The uploaded image with a box drawn around each recognised word" %>
+        </div>
+      <% elsif @ocr_document.failed? %>
+        <div class="plate__empty">No marked copy: processing stopped.</div>
+      <% else %>
+        <div class="plate__empty" role="status">
+          <span class="spinner" aria-hidden="true"></span>
+          Drawing word boxes. This page refreshes on its own.
+        </div>
+      <% end %>
+    </figure>
+  </div>
 </div>

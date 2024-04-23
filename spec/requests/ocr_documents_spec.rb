@@ -46,7 +46,7 @@ RSpec.describe 'OCR documents', type: :request do
       get ocr_document_path(document)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('Uploaded image')
+      expect(response.body).to include('The uploaded image')
     end
 
     it 'shows the failure message instead of a spinner once processing gave up' do
@@ -55,7 +55,7 @@ RSpec.describe 'OCR documents', type: :request do
       get ocr_document_path(document)
 
       expect(response.body).to include('Text could not be read from this image.')
-      expect(response.body).not_to include('Being processed')
+      expect(response.body).not_to include('Drawing word boxes')
     end
 
     it 'does not answer to the plain sequential id' do

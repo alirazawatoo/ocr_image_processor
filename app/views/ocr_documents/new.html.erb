@@ -1,19 +1,38 @@
-<div class="form-container">
-  <%= form_with(model: @ocr_document, url: ocr_documents_path, method: :post, local: true) do |form| %>
-    <h3>hOCR Processing App</h3>
-    <% if @ocr_document.errors.any? %>
-      <ul class="form-errors" role="alert">
-        <% @ocr_document.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+<% content_for :title, "Upload" %>
+
+<div class="intake">
+  <section class="intake__intro" aria-labelledby="intro-heading">
+    <p class="eyebrow">Scan · Read · Find</p>
+    <h1 id="intro-heading">Find any word on a scanned page.</h1>
+    <ol class="steps">
+      <li><strong>Upload a PNG.</strong> A screenshot, a scanned receipt, a page of a form.</li>
+      <li><strong>Tesseract reads it</strong> in the background and records every word with its position.</li>
+      <li><strong>Search the page.</strong> Matches are highlighted on the image, and a marked copy outlines every word found.</li>
+    </ol>
+  </section>
+
+  <section class="sheet intake__form" aria-labelledby="upload-heading">
+    <h2 id="upload-heading">New document</h2>
+
+    <%= form_with(model: @ocr_document, url: ocr_documents_path, method: :post) do |form| %>
+      <% if @ocr_document.errors.any? %>
+        <div class="form-errors" role="alert">
+          <p>That file can't be processed:</p>
+          <ul>
+            <% @ocr_document.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="dropzone">
+        <%= form.label :original_image, "Image file" %>
+        <%= form.file_field :original_image, accept: "image/png", required: true, "aria-describedby": "upload-limits" %>
+        <p id="upload-limits" class="hint">PNG only · up to 1 MB · at most 6000 px on a side</p>
+      </div>
+
+      <%= form.submit "Read this image", class: "button", data: { turbo_submits_with: "Uploading…" } %>
     <% end %>
-    <div class="form-field">
-      <%= form.label :original_image, "Upload Image" %>
-      <%= form.file_field :original_image, accept: "image/png" %>
-    </div>
-    <div class="form-field">
-      <%= form.submit %>
-    </div>
-  <% end %>
+  </section>
 </div>
