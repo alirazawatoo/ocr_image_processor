@@ -64,4 +64,18 @@ RSpec.describe OcrDocument, type: :model do
       expect(document).not_to be_valid
     end
   end
+
+  describe 'document links' do
+    let(:ocr_document) { create(:ocr_document) }
+
+    it 'uses a signed token rather than the numeric id' do
+      expect(ocr_document.to_param).not_to eq(ocr_document.id.to_s)
+      expect(described_class.from_link(ocr_document.to_param)).to eq(ocr_document)
+    end
+
+    it 'finds nothing for a tampered or numeric token' do
+      expect(described_class.from_link(ocr_document.id.to_s)).to be_nil
+      expect(described_class.from_link("#{ocr_document.to_param}x")).to be_nil
+    end
+  end
 end

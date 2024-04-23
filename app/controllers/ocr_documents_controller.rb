@@ -34,7 +34,7 @@ class OcrDocumentsController < ApplicationController
   private
 
   def find_ocr_document
-    @ocr_document = OcrDocument.find_by(id: params[:id])
+    @ocr_document = OcrDocument.from_link(params[:id])
     return if @ocr_document
 
     respond_to do |format|

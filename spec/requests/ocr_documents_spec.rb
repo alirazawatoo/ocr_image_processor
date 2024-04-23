@@ -57,6 +57,14 @@ RSpec.describe 'OCR documents', type: :request do
       expect(response.body).not_to include('Being processed')
     end
 
+    it 'does not answer to the plain sequential id' do
+      document = create(:ocr_document)
+
+      get "/ocr_documents/#{document.id}"
+
+      expect(response).to redirect_to(root_path)
+    end
+
     it 'redirects home with a message for an unknown id' do
       get ocr_document_path(0)
 

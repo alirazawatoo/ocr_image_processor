@@ -5,6 +5,7 @@ class OcrDocument < ApplicationRecord
   MAX_SIDE = 6_000
   # A 1 MB PNG can still declare billions of pixels; cap the decoded size too.
   MAX_PIXELS = 25_000_000
+  LINK_PURPOSE = :document_link
 
   has_many :text_extractions, dependent: :delete_all
   has_one_attached :original_image
@@ -14,6 +15,16 @@ class OcrDocument < ApplicationRecord
   validate :acceptable_image
 
   after_create_commit :enqueue_text_extraction
+
+  # There are no accounts, so the link is the only access control: use a
+  # signed id instead of the guessable sequential one.
+  def to_param
+    signed_id(purpose: LINK_PURPOSE) if persisted?
+  end
+
+  def self.from_link(token)
+    find_signed(token, purpose: LINK_PURPOSE)
+  end
 
   def failed?
     processing_error.present?
